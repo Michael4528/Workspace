@@ -119,7 +119,7 @@ class Database:
                             ,(receiptId, menuId,))
         result = self.cursor.fetchall()
         return result
-    
+
     def increaseCount(self, receiptId, menuId):
         self.connection = sqlite3.connect(self.__db_name)
         self.cursor = self.connection.cursor()
