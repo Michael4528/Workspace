@@ -79,7 +79,7 @@ class Database:
                             , (name, price, id,))
         self.connection.commit()
         self.connection.close()
-        
+
 
     def getMenuItems(self, isFood):
         self.connection = sqlite3.connect(self.__db_name)
@@ -111,11 +111,11 @@ class Database:
                             ,(receiptId, menuId, count, price,))
         self.connection.commit()
         self.connection.close()
-    
+
     def getReceiptByReceiptIdMenuId(self, receiptId, menuId):
         self.connection = sqlite3.connect(self.__db_name)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ?" 
+        self.cursor.execute("SELECT * FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ?"
                             ,(receiptId, menuId,))
         result = self.cursor.fetchall()
         return result
@@ -123,7 +123,7 @@ class Database:
     def increaseCount(self, receiptId, menuId):
         self.connection = sqlite3.connect(self.__db_name)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("UPDATE Table_receipts SET COUNT = COUNT + 1 WHERE RECEIPT_ID = ? AND MENU_ID = ?" 
+        self.cursor.execute("UPDATE Table_receipts SET COUNT = COUNT + 1 WHERE RECEIPT_ID = ? AND MENU_ID = ?"
                             , (receiptId, menuId,))
         self.connection.commit()
         self.connection.close()
@@ -155,6 +155,7 @@ class Database:
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
 #endregion
 
+
 #region General
 db = None
 if os.path.isfile('restaurant.db') == False:
@@ -173,7 +174,7 @@ def loadReceipts(receiptId):
     receipts = db.getReceiptsByReceiptId(receiptId)
     for receipt in receipts:
         listBox.insert(0, "%s %s %s %s" %(receipt[1], receipt[2], receipt[3], receipt[4]))
-        
+
 #-------------------------------------------------------------------------------------- Receipt Frame
 
 receiptFrame = LabelFrame(root, text="Receipt",
@@ -242,7 +243,7 @@ def newReceipt():
     maxReceiptNumber += 1
     entryOrderNum.delete(0, 'end')
     entryOrderNum.insert(0, maxReceiptNumber)
-    
+
 newButton = Button(listBoxButtonsFrame, text='Add factor',
 font=myFont, command=newReceipt)
 newButton.grid(column=1, row=0, sticky='nsew')
@@ -285,7 +286,7 @@ minusButton.grid(column=3, row=0, sticky='nsew')
 
 #-------------------------------------------------------------------- Menu Frame
 
-menuFrame = LabelFrame(root, text="Menu", 
+menuFrame = LabelFrame(root, text="Menu",
 font=myFont, padx=pad_x, pady=pad_y)
 menuFrame.grid(column=1, row=0, sticky='nsew')
 menuFrame.grid_columnconfigure(0, weight=1)
@@ -314,7 +315,7 @@ def addDrink(event):
         db.insertIntoReceipts(receiptId, menuId, 1, price)
     else:
         db.increaseCount(receiptId, menuId)
-        
+
     loadReceipts(receiptId)
 
 listboxDrinks.bind('<Double-Button>', addDrink)
@@ -341,7 +342,7 @@ def addFood(event):
         db.insertIntoReceipts(receiptId, menuId, 1, price)
     else:
         db.increaseCount(receiptId, menuId)
-    
+
     loadReceipts(receiptId)
 
 listBoxFoods.bind('<Double-Button>', addFood)
