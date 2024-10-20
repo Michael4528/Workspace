@@ -126,14 +126,16 @@ class Database:
     def getReceiptsByReceiptId(self, receiptId):
         self.connection = sqlite3.connect(self.__db_name)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM viewMenuReceipts WHERE RECEIPT_ID = ?" ,(receiptId,))
+        self.cursor.execute("SELECT * FROM viewMenuReceipts WHERE RECEIPT_ID = ?"
+                            ,(receiptId,))
         result = self.cursor.fetchall()
         return result
 
     def deleteReceipt(self, receiptId, menuId):
         self.connection = sqlite3.connect(self.__db_name)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("DELETE FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ?", (receiptId, menuId))
+        self.cursor.execute("DELETE FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ?"
+                            , (receiptId, menuId))
         self.connection.commit()
         self.connection.close()
 
