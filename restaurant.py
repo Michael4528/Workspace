@@ -3,8 +3,6 @@ from tkinter.font import *
 from tkinter import messagebox
 import os
 
-
-
 root = Tk()
 pad_x = 5
 pad_y = 5
@@ -17,8 +15,6 @@ root.grid_columnconfigure(1, weight=3)
 root.grid_rowconfigure(0, weight=1)
 root.title('Restaurant Manager')
 myFont = Font(family='Calibri', size=16)
-
-
 
 #-------------------------------------------------------------------------------------- Database
 #region Database
