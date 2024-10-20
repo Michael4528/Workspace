@@ -45,9 +45,8 @@ class Database:
 
         self.cursor.execute("""
                             CREATE VIEW IF NOT EXISTS viewMenuReceipts AS
-                            SELECT Table_receipts.RECEIPT_ID, Table_menu.Name, Table_receipts.Price,
-                            Table_receipts.COUNT,(Table_receipts.COUNT * Table_receipts.Price) AS SUM
-                            FROM Table_menu
+                            SELECT Table_receipts.RECEIPT_ID, Table_menu.Name,Table_receipts.Price,Table_receipts.COUNT
+                            ,(Table_receipts.COUNT * Table_receipts.Price) AS SUM FROM Table_menu
                             INNER JOIN Table_receipts ON Table_menu.ID = Table_receipts.MENU_ID
                             """)
 
