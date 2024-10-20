@@ -20,10 +20,9 @@ myFont = Font(family='Calibri', size=16)
 
 
 
-
+#-------------------------------------------------------------------------------------- Database
 #region Database
 import sqlite3
-
 class Database:
     def __init__(self, db):
         self.__db_name = db
@@ -55,7 +54,7 @@ class Database:
         self.connection.close()
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
-
+#region MenuTable
     def fetch(self,):
         self.cursor.execute("SELECT * FROM Table_menu")
         rows = self.cursor.fetchall()
@@ -151,12 +150,9 @@ class Database:
                             , (receiptId, menuId))
         self.connection.commit()
         self.connection.close()
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
 #endregion
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
 
-
-#region General
 db = None
 if os.path.isfile('restaurant.db') == False:
     db = Database('restaurant.db')
@@ -174,8 +170,11 @@ def loadReceipts(receiptId):
     receipts = db.getReceiptsByReceiptId(receiptId)
     for receipt in receipts:
         listBox.insert(0, "%s %s %s %s" %(receipt[1], receipt[2], receipt[3], receipt[4]))
+#endregion
+#-------------------------------------------------------------------------------------- Database
 
 #-------------------------------------------------------------------------------------- Receipt Frame
+#region Receipt
 
 receiptFrame = LabelFrame(root, text="Receipt",
 font=myFont, padx=pad_x, pady=pad_y)
@@ -277,15 +276,11 @@ minusButton = Button(listBoxButtonsFrame, text='-',
 font=myFont, command=decreaseItem)
 minusButton.grid(column=3, row=0, sticky='nsew')
 
+#endregion
 #-------------------------------------------------------------------------------------- Receipt Frame
 
-
-
-
-
-
-#-------------------------------------------------------------------- Menu Frame
-
+#-------------------------------------------------------------------------------------- Menu Frame
+#region menu
 menuFrame = LabelFrame(root, text="Menu",
 font=myFont, padx=pad_x, pady=pad_y)
 menuFrame.grid(column=1, row=0, sticky='nsew')
@@ -352,13 +347,11 @@ for food in foods:
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Food frame
 
-#-------------------------------------------------------------------- Menu Frame
+#endregion
+#-------------------------------------------------------------------------------------- Menu Frame
 
-
-
-
-#-------------------------------------------------------------------- Buttons Frame
-
+#-------------------------------------------------------------------------------------- Buttons Frame
+#region Buttons
 buttonFrame = LabelFrame(root, font=myFont)
 buttonFrame.grid(column=1, row=1)
 from subprocess import call
@@ -379,9 +372,7 @@ calcButton = Button(buttonFrame, text='Calculator', font=myFont,
 command=openCalculator)
 calcButton.grid(column=1, row=0)
 root.protocol("WM_DELETE_WINDOW", exitProgram)
-
-#-------------------------------------------------------------------- Buttons Frame
+#endregion
+#-------------------------------------------------------------------------------------- Buttons Frame
 
 root.mainloop()
-
-#endregion
