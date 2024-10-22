@@ -3,7 +3,9 @@ from tkinter.font import *
 from tkinter import messagebox
 import os
 
+
 root = Tk()
+root.configure(bg="#171717")
 pad_x = 5
 pad_y = 5
 width = root.winfo_screenwidth()
@@ -175,12 +177,13 @@ def loadReceipts(receiptId):
 #region Receipt
 
 receiptFrame = LabelFrame(root, text="Receipt",
-font=myFont, padx=pad_x, pady=pad_y)
+font=myFont, padx=pad_x, pady=pad_y, bg="#171717", fg="#e0e0e0")
 receiptFrame.grid(column=0, row=0, sticky='nsew')
 receiptFrame.grid_columnconfigure(0, weight=1)
 receiptFrame.grid_rowconfigure(1, weight=1)
 
-entryOrderNum = Entry(receiptFrame, font=myFont, width=10, justify='center')
+entryOrderNum = Entry(receiptFrame, font=myFont, width=10, justify='center', bg="#171717", fg="#e0e0e0"
+, highlightthickness=1, highlightbackground="black")
 entryOrderNum.grid(column=0, row=0)
 
 def entryKeyRelease(key):
@@ -201,11 +204,14 @@ else:
 maxReceiptNumber += 1
 entryOrderNum.insert(0, maxReceiptNumber)
 
-listBox = Listbox(receiptFrame, font=myFont)
+listBox = Listbox(receiptFrame, font=myFont, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 listBox.grid(column=0, row=1, sticky='nsew')
 
 
-listBoxButtonsFrame = LabelFrame(receiptFrame, font=myFont)
+
+listBoxButtonsFrame = LabelFrame(receiptFrame, font=myFont, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 listBoxButtonsFrame.grid(column=0, row=2, sticky='nsew')
 listBoxButtonsFrame.grid_columnconfigure(0, weight=1)
 listBoxButtonsFrame.grid_columnconfigure(1, weight=1)
@@ -224,7 +230,8 @@ def deleteReceiptItem():
     loadReceipts(receiptId)
 
 deleteButton = Button(listBoxButtonsFrame, text='Delete row',
-font=myFont, command=deleteReceiptItem)
+font=myFont, command=deleteReceiptItem, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 
 deleteButton.grid(column=0, row=0, sticky='nsew')
 
@@ -242,7 +249,8 @@ def newReceipt():
     entryOrderNum.insert(0, maxReceiptNumber)
 
 newButton = Button(listBoxButtonsFrame, text='Add factor',
-font=myFont, command=newReceipt)
+font=myFont, command=newReceipt, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 newButton.grid(column=1, row=0, sticky='nsew')
 
 #___________________________________________________________________________
@@ -256,7 +264,8 @@ def increaseItem():
     loadReceipts(receiptId)
 
 addButton = Button(listBoxButtonsFrame, text='+',
-font=myFont, command=increaseItem)
+font=myFont, command=increaseItem, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 addButton.grid(column=2, row=0, sticky='nsew')
 
 #___________________________________________________________________________
@@ -271,7 +280,8 @@ def decreaseItem():
 
 
 minusButton = Button(listBoxButtonsFrame, text='-',
-font=myFont, command=decreaseItem)
+font=myFont, command=decreaseItem, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 minusButton.grid(column=3, row=0, sticky='nsew')
 
 #endregion
@@ -280,7 +290,8 @@ minusButton.grid(column=3, row=0, sticky='nsew')
 #-------------------------------------------------------------------------------------- Menu Frame
 #region menu
 menuFrame = LabelFrame(root, text="Menu",
-font=myFont, padx=pad_x, pady=pad_y)
+font=myFont, padx=pad_x, pady=pad_y, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 menuFrame.grid(column=1, row=0, sticky='nsew')
 menuFrame.grid_columnconfigure(0, weight=1)
 menuFrame.grid_columnconfigure(1, weight=2)
@@ -288,11 +299,13 @@ menuFrame.grid_rowconfigure(0, weight=1)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Drink frame
 
-drinkFrame = LabelFrame(menuFrame, text="Drinks", font=myFont)
+drinkFrame = LabelFrame(menuFrame, text="Drinks", font=myFont, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 drinkFrame.grid(column=0, row=0, sticky='nsew')
 drinkFrame.grid_columnconfigure(0, weight=1)
 drinkFrame.grid_rowconfigure(0, weight=1)
-listboxDrinks = Listbox(drinkFrame, font=myFont, exportselection=False)
+listboxDrinks = Listbox(drinkFrame, font=myFont, exportselection=False, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 listboxDrinks.grid(sticky='nsew')
 drinks = db.getMenuItems(False)
 for drink in drinks:
@@ -317,11 +330,13 @@ listboxDrinks.bind('<Double-Button>', addDrink)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Food frame
 
-foodFrame = LabelFrame(menuFrame, text="Foods", font=myFont)
+foodFrame = LabelFrame(menuFrame, text="Foods", font=myFont, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 foodFrame.grid(column=1, row=0, sticky='nsew')
 foodFrame.grid_columnconfigure(0, weight=1)
 foodFrame.grid_rowconfigure(0, weight=1)
-listBoxFoods = Listbox(foodFrame, font=myFont, exportselection=False)
+listBoxFoods = Listbox(foodFrame, font=myFont, exportselection=False, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 listBoxFoods.grid(sticky='nsew')
 foods = db.getMenuItems(True)
 
@@ -350,7 +365,8 @@ for food in foods:
 
 #-------------------------------------------------------------------------------------- Buttons Frame
 #region Buttons
-buttonFrame = LabelFrame(root, font=myFont)
+buttonFrame = LabelFrame(root, font=myFont, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 buttonFrame.grid(column=1, row=1)
 from subprocess import call
 def openCalculator():
@@ -362,12 +378,13 @@ def exitProgram():
     if msgBox == 'yes':
         root.destroy()
 
-exitButton = Button(buttonFrame, text='Exit', font=myFont, fg='gray'
-, command=exitProgram)
+exitButton = Button(buttonFrame, text='Exit', font=myFont, bg="#171717", fg="#e0e0e0"
+, command=exitProgram, highlightthickness=3, highlightbackground="black")
 exitButton.grid(column=0, row=0)
 
 calcButton = Button(buttonFrame, text='Calculator', font=myFont,
-command=openCalculator)
+command=openCalculator, bg="#171717", fg="#e0e0e0"
+, highlightthickness=3, highlightbackground="black")
 calcButton.grid(column=1, row=0)
 root.protocol("WM_DELETE_WINDOW", exitProgram)
 #endregion
