@@ -373,5 +373,4 @@ root.protocol("WM_DELETE_WINDOW", exitProgram)
 #endregion
 #-------------------------------------------------------------------------------------- Buttons Frame
 
-
 root.mainloop()
