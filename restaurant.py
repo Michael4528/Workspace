@@ -300,7 +300,7 @@ menuFrame.grid_rowconfigure(0, weight=1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Drink frame
 
 drinkFrame = LabelFrame(menuFrame, text="Drinks", font=myFont, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+, highlightthickness=3, highlightbackground="black", highlightcolor="black")
 drinkFrame.grid(column=0, row=0, sticky='nsew')
 drinkFrame.grid_columnconfigure(0, weight=1)
 drinkFrame.grid_rowconfigure(0, weight=1)
