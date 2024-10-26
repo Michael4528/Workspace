@@ -21,6 +21,7 @@ myFont = Font(family='Calibri', size=16)
 
 #-------------------------------------------------------------------------------------- Database
 #region Database
+
 import sqlite3
 class Database:
     def __init__(self, db):
