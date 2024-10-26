@@ -25,29 +25,30 @@ myFont = Font(family='Calibri', size=16)
 import sqlite3
 class Database:
     def __init__(self, db):
-        self.__db_name = db
+        #######################################################################################################
+        self.__db_NAME = db
         self.connection = sqlite3.connect(db)
         self.cursor = self.connection.cursor()
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS [Table_menu](
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS [TABLE_MENU](
                                 [ID] INT PRIMARY KEY NOT NULL UNIQUE,
-                                [Name] VARCHAR(50) NOT NULL UNIQUE,
-                                [Price] INT NOT NULL,
-                                [isFood] BOOL NOT NULL) WITHOUT ROWID;
+                                [NAME] VARCHAR(50) NOT NULL UNIQUE,
+                                [PRICE] INT NOT NULL,
+                                [ISFOOD] BOOL NOT NULL) WITHOUT ROWID;
                             """)
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS [Table_receipts](
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS [TABLE_RECEIPTS](
                                 [RECEIPT_ID] INT NOT NULL,
-                                [MENU_ID] INT NOT NULL REFERENCES [Table_menu]([ID]),
+                                [MENU_ID] INT NOT NULL REFERENCES [TABLE_MENU]([ID]),
                                 [COUNT] INT,
-                                [Price] INT);
+                                [PRICE] INT);
                             """)
 
         self.cursor.execute("""
                             CREATE VIEW IF NOT EXISTS viewMenuReceipts AS
-                            SELECT Table_receipts.RECEIPT_ID, Table_menu.Name,Table_receipts.Price,Table_receipts.COUNT
-                            ,(Table_receipts.COUNT * Table_receipts.Price) AS SUM FROM Table_menu
-                            INNER JOIN Table_receipts ON Table_menu.ID = Table_receipts.MENU_ID
+                            SELECT TABLE_RECEIPTS.RECEIPT_ID,[TABLE_MENU].NAME,TABLE_RECEIPTS.PRICE,TABLE_RECEIPTS.COUNT
+                            ,(TABLE_RECEIPTS.COUNT * TABLE_RECEIPTS.PRICE) AS SUM FROM[TABLE_MENU]
+                            INNER JOIN TABLE_RECEIPTS ON[TABLE_MENU].ID = TABLE_RECEIPTS.MENU_ID
                             """)
 
         self.connection.commit()
@@ -56,79 +57,79 @@ class Database:
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
 #region MenuTable
     def fetch(self,):
-        self.cursor.execute("SELECT * FROM Table_menu")
+        self.cursor.execute("SELECT * FROM[TABLE_MENU]")
         rows = self.cursor.fetchall()
         return rows
 
-    def insert(self, id, name, price, isFood):
-        self.connection = sqlite3.connect(self.__db_name)
+    def insert(self, id, NAME, PRICE, ISFOOD):
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("INSERT INTO Table_menu VALUES (?, ?, ?, ?)"
-                            , (id, name, price, isFood,))
+        self.cursor.execute("INSERT INTO[TABLE_MENU] VALUES (?, ?, ?, ?)"
+                            , (id, NAME, PRICE, ISFOOD,))
         self.connection.commit()
         self.connection.close()
 
     def remove(self, id):
-        self.cursor.execute("DELETE FROM Table_menu WHERE Id=?"
+        self.cursor.execute("DELETE FROM[TABLE_MENU] WHERE Id=?"
                             , (id,))
         self.connection.commit()
 
-    def update(self, id, name, price):
-        self.cursor.execute("UPDATE Table_menu SET Name=?, Price=? WHERE Id=?"
-                            , (name, price, id,))
+    def update(self, id, NAME, PRICE):
+        self.cursor.execute("UPDATE[TABLE_MENU] SET NAME=?, PRICE=? WHERE Id=?"
+                            , (NAME, PRICE, id,))
         self.connection.commit()
         self.connection.close()
 
 
-    def getMenuItems(self, isFood):
-        self.connection = sqlite3.connect(self.__db_name)
+    def getMenuItems(self, ISFOOD):
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM Table_menu WHERE isFood = ?"
-                            , (isFood,))
+        self.cursor.execute("SELECT * FROM[TABLE_MENU] WHERE ISFOOD = ?"
+                            , (ISFOOD,))
         result = self.cursor.fetchall()
         return result
 
     def getMaxReceiptId(self):
-        self.connection = sqlite3.connect(self.__db_name)
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT MAX(RECEIPT_ID) FROM Table_receipts")
+        self.cursor.execute("SELECT MAX(RECEIPT_ID) FROM TABLE_RECEIPTS")
+        result = self.cursor.fetchall()
+        return result
+#######################################################################################################
+    def getMenuItemsByNAME(self, menuItemNAME):
+        self.connection = sqlite3.connect(self.__db_NAME)
+        self.cursor = self.connection.cursor()
+        self.cursor.execute("SELECT * FROM[TABLE_MENU] WHERE NAME=?"
+                            , (menuItemNAME,))
         result = self.cursor.fetchall()
         return result
 
-    def getMenuItemsByName(self, menuItemName):
-        self.connection = sqlite3.connect(self.__db_name)
+    def insertIntoReceipts(self, receiptId, menuId, count, PRICE):
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM Table_menu WHERE Name=?"
-                            , (menuItemName,))
-        result = self.cursor.fetchall()
-        return result
-
-    def insertIntoReceipts(self, receiptId, menuId, count, price):
-        self.connection = sqlite3.connect(self.__db_name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("INSERT INTO Table_receipts VALUES (?, ?, ?, ?)"
-                            ,(receiptId, menuId, count, price,))
+        self.cursor.execute("INSERT INTO TABLE_RECEIPTS VALUES (?, ?, ?, ?)"
+                            ,(receiptId, menuId, count, PRICE,))
         self.connection.commit()
         self.connection.close()
 
     def getReceiptByReceiptIdMenuId(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_name)
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ?"
+        self.cursor.execute("SELECT * FROM TABLE_RECEIPTS WHERE RECEIPT_ID = ? AND MENU_ID = ?"
                             ,(receiptId, menuId,))
         result = self.cursor.fetchall()
         return result
 
     def increaseCount(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_name)
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("UPDATE Table_receipts SET COUNT = COUNT + 1 WHERE RECEIPT_ID = ? AND MENU_ID = ?"
+        self.cursor.execute("UPDATE TABLE_RECEIPTS SET COUNT = COUNT + 1 WHERE RECEIPT_ID = ? AND MENU_ID = ?"
                             , (receiptId, menuId,))
         self.connection.commit()
         self.connection.close()
 
     def getReceiptsByReceiptId(self, receiptId):
-        self.connection = sqlite3.connect(self.__db_name)
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
         self.cursor.execute("SELECT * FROM viewMenuReceipts WHERE RECEIPT_ID = ?"
                             ,(receiptId,))
@@ -136,19 +137,19 @@ class Database:
         return result
 
     def deleteReceipt(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_name)
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("DELETE FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ?"
+        self.cursor.execute("DELETE FROM TABLE_RECEIPTS WHERE RECEIPT_ID = ? AND MENU_ID = ?"
                             , (receiptId, menuId))
         self.connection.commit()
         self.connection.close()
 
     def decreaseCount(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_name)
+        self.connection = sqlite3.connect(self.__db_NAME)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("UPDATE Table_receipts SET COUNT = COUNT - 1 WHERE RECEIPT_ID = ? AND MENU_ID = ? AND COUNT > 0"
+        self.cursor.execute("UPDATE TABLE_RECEIPTS SET COUNT = COUNT - 1 WHERE RECEIPT_ID = ? AND MENU_ID = ? AND COUNT > 0"
                             , (receiptId, menuId))
-        self.cursor.execute("DELETE FROM Table_receipts WHERE RECEIPT_ID = ? AND MENU_ID = ? AND COUNT = 0"
+        self.cursor.execute("DELETE FROM TABLE_RECEIPTS WHERE RECEIPT_ID = ? AND MENU_ID = ? AND COUNT = 0"
                             , (receiptId, menuId))
         self.connection.commit()
         self.connection.close()
@@ -225,8 +226,9 @@ listBoxButtonsFrame.grid_columnconfigure(3, weight=1)
 def deleteReceiptItem():
     receiptId = int(entryOrderNum.get())
     menuItem = listBox.get(ACTIVE)
-    menuItemName = menuItem.split(" ")[0]
-    result = db.getMenuItemsByName(menuItemName)
+    menuItemNAME = menuItem.split(" ")[0]
+    #######################################################################################################
+    result = db.getMenuItemsByNAME(menuItemNAME)
     menuItemId = int(result[0][0])
     db.deleteReceipt(receiptId, menuItemId)
     loadReceipts(receiptId)
@@ -258,8 +260,9 @@ newButton.grid(column=1, row=0, sticky='nsew')
 #___________________________________________________________________________
 
 def increaseItem():
-    menuItemName = listBox.get(ACTIVE)
-    result = db.getMenuItemsByName(menuItemName.split(" ")[0])
+    menuItemNAME = listBox.get(ACTIVE)
+    #######################################################################################################
+    result = db.getMenuItemsByNAME(menuItemNAME.split(" ")[0])
     menuItemId = result[0][0]
     receiptId = int(entryOrderNum.get())
     db.increaseCount(receiptId, menuItemId)
@@ -273,8 +276,9 @@ addButton.grid(column=2, row=0, sticky='nsew')
 #___________________________________________________________________________
 
 def decreaseItem():
-    menuItemName = listBox.get(ACTIVE)
-    result = db.getMenuItemsByName(menuItemName.split(" ")[0])
+    menuItemNAME = listBox.get(ACTIVE)
+    #######################################################################################################
+    result = db.getMenuItemsByNAME(menuItemNAME.split(" ")[0])
     menuItemId = result[0][0]
     receiptId = int(entryOrderNum.get())
     db.decreaseCount(receiptId, menuItemId)
@@ -314,13 +318,14 @@ for drink in drinks:
     listboxDrinks.insert('end', drink[1])
 
 def addDrink(event):
-    drinkItem = db.getMenuItemsByName(listboxDrinks.get(ACTIVE))
+#######################################################################################################
+    drinkItem = db.getMenuItemsByNAME(listboxDrinks.get(ACTIVE))
     menuId = drinkItem[0][0]
-    price = drinkItem[0][2]
+    PRICE = drinkItem[0][2]
     receiptId = int(entryOrderNum.get())
     result = db.getReceiptByReceiptIdMenuId(receiptId, menuId)
     if len(result) == 0:
-        db.insertIntoReceipts(receiptId, menuId, 1, price)
+        db.insertIntoReceipts(receiptId, menuId, 1, PRICE)
     else:
         db.increaseCount(receiptId, menuId)
 
@@ -343,13 +348,14 @@ listBoxFoods.grid(sticky='nsew')
 foods = db.getMenuItems(True)
 
 def addFood(event):
-    foodItem = db.getMenuItemsByName(listBoxFoods.get(ACTIVE))
+    #######################################################################################################
+    foodItem = db.getMenuItemsByNAME(listBoxFoods.get(ACTIVE))
     menuId = foodItem[0][0]
-    price = foodItem[0][2]
+    PRICE = foodItem[0][2]
     receiptId = int(entryOrderNum.get())
     result = db.getReceiptByReceiptIdMenuId(receiptId, menuId)
     if len(result) == 0:
-        db.insertIntoReceipts(receiptId, menuId, 1, price)
+        db.insertIntoReceipts(receiptId, menuId, 1, PRICE)
     else:
         db.increaseCount(receiptId, menuId)
 
