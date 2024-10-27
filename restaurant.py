@@ -1,3 +1,4 @@
+#region imports
 from tkinter import *
 from tkinter.font import *
 from tkinter import messagebox
@@ -5,9 +6,9 @@ import os
 from typing import Final
 from telegram import Update, ForceReply
 from telegram.ext import Application, CommandHandler, ContextTypes
+#endregion
 
-
-
+#region others
 root = Tk()
 root.configure(bg="#171717")
 pad_x = 5
@@ -21,6 +22,7 @@ root.grid_columnconfigure(1, weight=3)
 root.grid_rowconfigure(0, weight=1)
 root.title('Restaurant Manager')
 myFont = Font(family='Calibri', size=16)
+#endregion
 
 #-------------------------------------------------------------------------------------- Database
 #region Database
