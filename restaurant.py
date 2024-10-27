@@ -2,7 +2,9 @@ from tkinter import *
 from tkinter.font import *
 from tkinter import messagebox
 import os
-
+from typing import Final
+from telegram import Update, ForceReply
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 
 
@@ -177,10 +179,6 @@ def loadReceipts(receiptId):
 
 #-------------------------------------------------------------------------------------- Bot
 #region bot
-from typing import Final
-from telegram import Update, ForceReply
-from telegram.ext import Application, CommandHandler, ContextTypes
-
 TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
 DATABASE_FILE: Final = 'restaurant.db'
 async def startCommand(update: Update, context: ContextTypes.DEFAULT_TYPE):
