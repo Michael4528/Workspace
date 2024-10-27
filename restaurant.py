@@ -175,6 +175,29 @@ def loadReceipts(receiptId):
 #endregion
 #-------------------------------------------------------------------------------------- Database
 
+#-------------------------------------------------------------------------------------- Bot
+#region bot
+from typing import Final
+from telegram import Update, ForceReply
+from telegram.ext import Application, CommandHandler, ContextTypes
+
+TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
+DATABASE_FILE: Final = 'restaurant.db'
+async def startCommand(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    await update.message.reply_html(
+        rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /restaurants to see the list.",
+        reply_markup=ForceReply(selective=True),
+    )
+
+
+if __name__ == '__main__':
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler('start', startCommand))
+    app.run_polling(poll_interval=1)
+#endregion
+#-------------------------------------------------------------------------------------- Bot
+
 #-------------------------------------------------------------------------------------- Receipt Frame
 #region Receipt
 
