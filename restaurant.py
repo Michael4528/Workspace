@@ -220,8 +220,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 # Fetch menu items
-menu_foods = db.getMenuItems(True)
-menu_drinks = db.getMenuItems(False)
+menu_foods = db.get_menu_items(True)
+menu_drinks = db.get_menu_items(False)
 
 # Function to display food menu
 async def food_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
