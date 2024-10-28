@@ -46,7 +46,6 @@ myFont = Font(family=FONT_FAMILY, size=FONT_SIZE)
 
 #endregion
 
-#-------------------------------------------------------------------------------------- Database
 #region Database
 
 import sqlite3
@@ -205,9 +204,7 @@ def load_receipts(receipt_id):
 
 
 #endregion
-#-------------------------------------------------------------------------------------- Database
 
-#-------------------------------------------------------------------------------------- Bot
 #region bot
 
 # Constants
@@ -243,9 +240,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('drinks', drink_command))
     app.run_polling(poll_interval=1)
 #endregion
-#-------------------------------------------------------------------------------------- Bot
 
-#-------------------------------------------------------------------------------------- Receipt Frame
 #region Receipt
 
 # Constants
@@ -358,9 +353,7 @@ minusButton = Button(listBoxButtonsFrame, text='-', font=FONT, command=decrease_
 minusButton.grid(column=3, row=0, sticky='nsew')
 
 #endregion
-#-------------------------------------------------------------------------------------- Receipt Frame
 
-#-------------------------------------------------------------------------------------- Menu Frame
 #region menu
 
 # Menu Frame
@@ -446,9 +439,7 @@ def load_receipts(receipt_id):
 
 
 #endregion
-#-------------------------------------------------------------------------------------- Menu Frame
 
-#-------------------------------------------------------------------------------------- Buttons Frame
 #region Buttons
 
 # Button Frame
@@ -486,6 +477,5 @@ calcButton.grid(column=1, row=0, padx=PAD_X, pady=PAD_Y)
 root.protocol("WM_DELETE_WINDOW", exit_program)
 
 #endregion
-#-------------------------------------------------------------------------------------- Buttons Frame
 
 root.mainloop()
