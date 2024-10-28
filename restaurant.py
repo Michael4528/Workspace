@@ -1,7 +1,9 @@
 #region imports
 from tkinter import *
 from tkinter.font import *
-from tkinter import messagebox
+import tkinter as tk 
+from tkinter import LabelFrame, Button, messagebox 
+from subprocess import call
 import os
 from typing import Final
 from telegram import Update, ForceReply
@@ -9,155 +11,171 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 #endregion
 
 #region others
-root = Tk()
-root.configure(bg="#171717")
-pad_x = 5
-pad_y = 5
-width = root.winfo_screenwidth()
-height = root.winfo_screenheight()
-root.geometry('%dx%d' %(width, height))
+
+# Constants 
+
+BACKGROUND_COLOR = "#171717" 
+FONT_FAMILY = 'Calibri' 
+FONT_SIZE = 16 
+
+# Initialize the root window 
+
+root = Tk() 
+root.configure(bg=BACKGROUND_COLOR)
+
+# Screen dimensions 
+
+pad_x, pad_y = 5, 5 
+width, height = root.winfo_screenwidth(), root.winfo_screenheight() 
+root.geometry(f'{width}x{height}') 
 root.state('zoomed')
-root.grid_columnconfigure(0, weight=2)
-root.grid_columnconfigure(1, weight=3)
-root.grid_rowconfigure(0, weight=1)
-root.title('Restaurant Manager')
-myFont = Font(family='Calibri', size=16)
+
+# Configure grid layout 
+
+root.grid_columnconfigure(0, weight=2) 
+root.grid_columnconfigure(1, weight=3) 
+root.grid_rowconfigure(0, weight=1) 
+
+# Window title 
+
+root.title('Restaurant Manager') 
+
+# Font settings 
+
+myFont = Font(family=FONT_FAMILY, size=FONT_SIZE)
+
 #endregion
 
 #-------------------------------------------------------------------------------------- Database
 #region Database
 
 import sqlite3
+
 class Database:
     def __init__(self, db):
-        self.__db_Name = db
-        self.connection = sqlite3.connect(db)
+        self.__db_name = db
+        self.connect()
+        self.setup_database()
+
+    def connect(self):
+        self.connection = sqlite3.connect(self.__db_name)
         self.cursor = self.connection.cursor()
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS [TABLE_MENU](
-                                [ID] INT PRIMARY KEY NOT NULL UNIQUE,
-                                [NAME] VARCHAR(50) NOT NULL UNIQUE,
-                                [PRICE] INT NOT NULL,
-                                [ISFOOD] BOOL NOT NULL) WITHOUT ROWID;
-                            """)
-
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS [TABLE_RECEIPTS](
-                                [RECEIPT_ID] INT NOT NULL,
-                                [MENU_ID] INT NOT NULL REFERENCES [TABLE_MENU]([ID]),
-                                [COUNT] INT,
-                                [PRICE] INT);
-                            """)
-
-        self.cursor.execute("""
-                            CREATE VIEW IF NOT EXISTS viewMenuReceipts AS
-                            SELECT TABLE_RECEIPTS.RECEIPT_ID,[TABLE_MENU].NAME,TABLE_RECEIPTS.PRICE,TABLE_RECEIPTS.COUNT
-                            ,(TABLE_RECEIPTS.COUNT * TABLE_RECEIPTS.PRICE) AS SUM FROM[TABLE_MENU]
-                            INNER JOIN TABLE_RECEIPTS ON[TABLE_MENU].ID = TABLE_RECEIPTS.MENU_ID
-                            """)
-
-        self.connection.commit()
+    def close(self):
         self.connection.close()
 
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
-#region MenuTable
-    def fetch(self,):
-        self.cursor.execute("SELECT * FROM[TABLE_MENU]")
+    def setup_database(self):
+        # Create Menu table
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS TABLE_MENU (
+                                ID INTEGER PRIMARY KEY NOT NULL UNIQUE,
+                                NAME TEXT NOT NULL UNIQUE,
+                                PRICE INTEGER NOT NULL,
+                                ISFOOD INTEGER NOT NULL) 
+                                WITHOUT ROWID''')
+
+        # Create Receipts table
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS TABLE_RECEIPTS (
+                                RECEIPT_ID INTEGER NOT NULL,
+                                MENU_ID INTEGER NOT NULL REFERENCES TABLE_MENU(ID),
+                                COUNT INTEGER,
+                                PRICE INTEGER)''')
+
+        # Create View for Menu Receipts
+        self.cursor.execute('''CREATE VIEW IF NOT EXISTS viewMenuReceipts AS
+                                SELECT TABLE_RECEIPTS.RECEIPT_ID,
+                                TABLE_MENU.NAME,
+                                TABLE_RECEIPTS.PRICE,
+                                TABLE_RECEIPTS.COUNT,
+                                (TABLE_RECEIPTS.COUNT * TABLE_RECEIPTS.PRICE) AS SUM
+                                FROM TABLE_MENU
+                                INNER JOIN TABLE_RECEIPTS ON TABLE_MENU.ID = TABLE_RECEIPTS.MENU_ID''')
+        self.connection.commit()
+
+    def fetch(self):
+        self.connect()
+        self.cursor.execute("SELECT * FROM TABLE_MENU")
         rows = self.cursor.fetchall()
+        self.close()
         return rows
 
-    def insert(self, id, Name, Price, IsFood):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("INSERT INTO[TABLE_MENU] VALUES (?, ?, ?, ?)"
-                            , (id, Name, Price, IsFood,))
-        self.connection.commit()
-        self.connection.close()
+    def insert(self, id, name, price, is_food):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO TABLE_MENU VALUES (?, ?, ?, ?)", (id, name, price, is_food))
+            conn.commit()
 
     def remove(self, id):
-        self.cursor.execute("DELETE FROM[TABLE_MENU] WHERE Id=?"
-                            , (id,))
-        self.connection.commit()
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM TABLE_MENU WHERE ID=?", (id,))
+            conn.commit()
 
-    def update(self, id, Name, Price):
-        self.cursor.execute("UPDATE[TABLE_MENU] SET NAME=?, PRICE=? WHERE Id=?"
-                            , (Name, Price, id,))
-        self.connection.commit()
-        self.connection.close()
+    def update(self, id, name, price):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE TABLE_MENU SET NAME=?, PRICE=? WHERE ID=?", (name, price, id))
+            conn.commit()
 
-    def getMenuItems(self, IsFood):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM[TABLE_MENU] WHERE ISFOOD = ?"
-                            , (IsFood,))
-        result = self.cursor.fetchall()
+    def get_menu_items(self, is_food):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM TABLE_MENU WHERE ISFOOD=?", (is_food,))
+            result = cursor.fetchall()
         return result
 
-    def getMaxReceiptId(self):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT MAX(RECEIPT_ID) FROM TABLE_RECEIPTS")
-        result = self.cursor.fetchall()
+    def get_max_receipt_id(self):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT MAX(RECEIPT_ID) FROM TABLE_RECEIPTS")
+            result = cursor.fetchone()
+        return result[0] if result[0] is not None else 0
+
+    def get_menu_items_by_name(self, menu_item_name):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM TABLE_MENU WHERE NAME=?", (menu_item_name,))
+            result = cursor.fetchall()
         return result
 
-    def getMenuItemsByName(self, menuItemName):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM[TABLE_MENU] WHERE NAME=?"
-                            , (menuItemName,))
-        result = self.cursor.fetchall()
+    def insert_into_receipts(self, receipt_id, menu_id, count, price):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO TABLE_RECEIPTS VALUES (?, ?, ?, ?)", (receipt_id, menu_id, count, price))
+            conn.commit()
+
+    def get_receipt_by_receipt_id_menu_id(self, receipt_id, menu_id):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM TABLE_RECEIPTS WHERE RECEIPT_ID=? AND MENU_ID=?", (receipt_id, menu_id))
+            result = cursor.fetchall()
         return result
 
-    def insertIntoReceipts(self, receiptId, menuId, count, Price):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("INSERT INTO TABLE_RECEIPTS VALUES (?, ?, ?, ?)"
-                            ,(receiptId, menuId, count, Price,))
-        self.connection.commit()
-        self.connection.close()
+    def increase_count(self, receipt_id, menu_id):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE TABLE_RECEIPTS SET COUNT=COUNT+1 WHERE RECEIPT_ID=? AND MENU_ID=?", (receipt_id, menu_id))
+            conn.commit()
 
-    def getReceiptByReceiptIdMenuId(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM TABLE_RECEIPTS WHERE RECEIPT_ID = ? AND MENU_ID = ?"
-                            ,(receiptId, menuId,))
-        result = self.cursor.fetchall()
+    def get_receipts_by_receipt_id(self, receipt_id):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM viewMenuReceipts WHERE RECEIPT_ID=?", (receipt_id,))
+            result = cursor.fetchall()
         return result
 
-    def increaseCount(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("UPDATE TABLE_RECEIPTS SET COUNT = COUNT + 1 WHERE RECEIPT_ID = ? AND MENU_ID = ?"
-                            , (receiptId, menuId,))
-        self.connection.commit()
-        self.connection.close()
+    def delete_receipt(self, receipt_id, menu_id):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM TABLE_RECEIPTS WHERE RECEIPT_ID=? AND MENU_ID=?", (receipt_id, menu_id))
+            conn.commit()
 
-    def getReceiptsByReceiptId(self, receiptId):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("SELECT * FROM viewMenuReceipts WHERE RECEIPT_ID = ?"
-                            ,(receiptId,))
-        result = self.cursor.fetchall()
-        return result
+    def decrease_count(self, receipt_id, menu_id):
+        with sqlite3.connect(self.__db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE TABLE_RECEIPTS SET COUNT=COUNT-1 WHERE RECEIPT_ID=? AND MENU_ID=? AND COUNT > 0", (receipt_id, menu_id))
+            cursor.execute("DELETE FROM TABLE_RECEIPTS WHERE RECEIPT_ID=? AND MENU_ID=? AND COUNT=0", (receipt_id, menu_id))
+            conn.commit()
 
-    def deleteReceipt(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("DELETE FROM TABLE_RECEIPTS WHERE RECEIPT_ID = ? AND MENU_ID = ?"
-                            , (receiptId, menuId))
-        self.connection.commit()
-        self.connection.close()
-
-    def decreaseCount(self, receiptId, menuId):
-        self.connection = sqlite3.connect(self.__db_Name)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("UPDATE TABLE_RECEIPTS SET COUNT = COUNT - 1 WHERE RECEIPT_ID = ? AND MENU_ID = ? AND COUNT > 0"
-                            , (receiptId, menuId))
-        self.cursor.execute("DELETE FROM TABLE_RECEIPTS WHERE RECEIPT_ID = ? AND MENU_ID = ? AND COUNT = 0"
-                            , (receiptId, menuId))
-        self.connection.commit()
-        self.connection.close()
-#endregion
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Table menu
 
 db = None
 if os.path.isfile('restaurant.db') == False:
@@ -171,11 +189,21 @@ else:
     db = Database('restaurant.db')
 
 
-def loadReceipts(receiptId):
-    listBox.delete(0, 'end')
-    receipts = db.getReceiptsByReceiptId(receiptId)
-    for receipt in receipts:
-        listBox.insert(0, "%s %s %s %s" %(receipt[1], receipt[2], receipt[3], receipt[4]))
+def load_receipts(receipt_id):
+    try:
+        # Clear the listbox
+        listBox.delete(0, 'end')
+        
+        # Fetch receipts from the database
+        receipts = db.get_receipts_by_receipt_id(receipt_id)
+        
+        # Insert each receipt into the listbox
+        for receipt in receipts:
+            listBox.insert(0, f"{receipt[1]} {receipt[2]} {receipt[3]} {receipt[4]}")
+    except Exception as e:
+        print(f"Error loading receipts: {e}")
+
+
 #endregion
 #-------------------------------------------------------------------------------------- Database
 
@@ -213,112 +241,113 @@ def loadReceipts(receiptId):
 #-------------------------------------------------------------------------------------- Receipt Frame
 #region Receipt
 
-receiptFrame = LabelFrame(root, text="Receipt",
-font=myFont, padx=pad_x, pady=pad_y, bg="#171717", fg="#e0e0e0")
+# Constants
+BACKGROUND_COLOR = "#171717"
+FOREGROUND_COLOR = "#e0e0e0"
+HIGHLIGHT_COLOR = "black"
+PAD_X, PAD_Y = 5, 5
+FONT = ('Calibri', 16)
+
+
+receiptFrame = LabelFrame(root, text="Receipt", font=FONT, padx=PAD_X, pady=PAD_Y, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR)
 receiptFrame.grid(column=0, row=0, sticky='nsew')
 receiptFrame.grid_columnconfigure(0, weight=1)
 receiptFrame.grid_rowconfigure(1, weight=1)
 
-entryOrderNum = Entry(receiptFrame, font=myFont, width=10, justify='center', bg="#171717", fg="#e0e0e0"
-, highlightthickness=1, highlightbackground="black")
+entryOrderNum = Entry(receiptFrame, font=FONT, width=10, justify='center', bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=1, highlightbackground=HIGHLIGHT_COLOR)
 entryOrderNum.grid(column=0, row=0)
 
-def entryKeyRelease(key):
+def entry_key_release(event):
     try:
-        receiptId = int(entryOrderNum.get())
-        loadReceipts(receiptId)
-    except:
+        receipt_id = int(entryOrderNum.get())
+        load_receipts(receipt_id)
+    except ValueError:
         listBox.delete(0, 'end')
 
-entryOrderNum.bind('<KeyRelease>', entryKeyRelease)
+entryOrderNum.bind('<KeyRelease>', entry_key_release)
 
-
-maxReceiptNumber = db.getMaxReceiptId()
-if maxReceiptNumber[0][0] == None:
-    maxReceiptNumber = 0
-else:
-    maxReceiptNumber = int(maxReceiptNumber[0][0])
+# Initialize max receipt number
+maxReceiptNumber = db.get_max_receipt_id()
+maxReceiptNumber = maxReceiptNumber if maxReceiptNumber is not None else 0
 maxReceiptNumber += 1
 entryOrderNum.insert(0, maxReceiptNumber)
 
-listBox = Listbox(receiptFrame, font=myFont, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+listBox = Listbox(receiptFrame, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 listBox.grid(column=0, row=1, sticky='nsew')
 
-
-
-listBoxButtonsFrame = LabelFrame(receiptFrame, font=myFont, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+listBoxButtonsFrame = LabelFrame(receiptFrame, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 listBoxButtonsFrame.grid(column=0, row=2, sticky='nsew')
 listBoxButtonsFrame.grid_columnconfigure(0, weight=1)
 listBoxButtonsFrame.grid_columnconfigure(1, weight=1)
 listBoxButtonsFrame.grid_columnconfigure(2, weight=1)
 listBoxButtonsFrame.grid_columnconfigure(3, weight=1)
 
-#___________________________________________________________________________
+def load_receipts(receipt_id):
+    try:
+        listBox.delete(0, 'end')
+        receipts = db.get_receipts_by_receipt_id(receipt_id)
+        for receipt in receipts:
+            listBox.insert(0, f"{receipt[1]} {receipt[2]} {receipt[3]} {receipt[4]}")
+    except Exception as e:
+        print(f"Error loading receipts: {e}")
 
-def deleteReceiptItem():
-    receiptId = int(entryOrderNum.get())
-    menuItem = listBox.get(ACTIVE)
-    menuItemName = menuItem.split(" ")[0]
-    result = db.getMenuItemsByName(menuItemName)
-    menuItemId = int(result[0][0])
-    db.deleteReceipt(receiptId, menuItemId)
-    loadReceipts(receiptId)
+def delete_receipt_item():
+    try:
+        receipt_id = int(entryOrderNum.get())
+        menu_item = listBox.get(ACTIVE)
+        menu_item_name = menu_item.split(" ")[0]
+        result = db.get_menu_items_by_name(menu_item_name)
+        menu_item_id = int(result[0][0])
+        db.delete_receipt(receipt_id, menu_item_id)
+        load_receipts(receipt_id)
+    except Exception as e:
+        print(f"Error deleting receipt item: {e}")
 
-deleteButton = Button(listBoxButtonsFrame, text='Delete row',
-font=myFont, command=deleteReceiptItem, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
-
+deleteButton = Button(listBoxButtonsFrame, text='Delete row', font=FONT, command=delete_receipt_item, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 deleteButton.grid(column=0, row=0, sticky='nsew')
 
-#___________________________________________________________________________
-
-def newReceipt():
+def new_receipt():
     listBox.delete(0, 'end')
-    maxReceiptNumber = db.getMaxReceiptId()
-    if maxReceiptNumber[0][0] == None:
-        maxReceiptNumber = 0
-    else:
-        maxReceiptNumber = int(maxReceiptNumber[0][0])
-    maxReceiptNumber += 1
+    max_receipt_number = db.get_max_receipt_id()
+    max_receipt_number = max_receipt_number if max_receipt_number is not None else 0
+    max_receipt_number += 1
     entryOrderNum.delete(0, 'end')
-    entryOrderNum.insert(0, maxReceiptNumber)
+    entryOrderNum.insert(0, max_receipt_number)
 
-newButton = Button(listBoxButtonsFrame, text='Add factor',
-font=myFont, command=newReceipt, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+newButton = Button(listBoxButtonsFrame, text='Add factor', font=FONT, command=new_receipt, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                    highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 newButton.grid(column=1, row=0, sticky='nsew')
 
-#___________________________________________________________________________
+def increase_item():
+    try:
+        menu_item_name = listBox.get(ACTIVE)
+        result = db.get_menu_items_by_name(menu_item_name.split(" ")[0])
+        menu_item_id = result[0][0]
+        receipt_id = int(entryOrderNum.get())
+        db.increase_count(receipt_id, menu_item_id)
+        load_receipts(receipt_id)
+    except Exception as e:
+        print(f"Error increasing item count: {e}")
 
-def increaseItem():
-    menuItemName = listBox.get(ACTIVE)
-    result = db.getMenuItemsByName(menuItemName.split(" ")[0])
-    menuItemId = result[0][0]
-    receiptId = int(entryOrderNum.get())
-    db.increaseCount(receiptId, menuItemId)
-    loadReceipts(receiptId)
-
-addButton = Button(listBoxButtonsFrame, text='+',
-font=myFont, command=increaseItem, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+addButton = Button(listBoxButtonsFrame, text='+', font=FONT, command=increase_item, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                    highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 addButton.grid(column=2, row=0, sticky='nsew')
 
-#___________________________________________________________________________
+def decrease_item():
+    try:
+        menu_item_name = listBox.get(ACTIVE)
+        result = db.get_menu_items_by_name(menu_item_name.split(" ")[0])
+        menu_item_id = result[0][0]
+        receipt_id = int(entryOrderNum.get())
+        db.decrease_count(receipt_id, menu_item_id)
+        load_receipts(receipt_id)
+    except Exception as e:
+        print(f"Error decreasing item count: {e}")
 
-def decreaseItem():
-    menuItemName = listBox.get(ACTIVE)
-    result = db.getMenuItemsByName(menuItemName.split(" ")[0])
-    menuItemId = result[0][0]
-    receiptId = int(entryOrderNum.get())
-    db.decreaseCount(receiptId, menuItemId)
-    loadReceipts(receiptId)
-
-
-minusButton = Button(listBoxButtonsFrame, text='-',
-font=myFont, command=decreaseItem, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+minusButton = Button(listBoxButtonsFrame, text='-', font=FONT, command=decrease_item, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 minusButton.grid(column=3, row=0, sticky='nsew')
 
 #endregion
@@ -326,104 +355,129 @@ minusButton.grid(column=3, row=0, sticky='nsew')
 
 #-------------------------------------------------------------------------------------- Menu Frame
 #region menu
-menuFrame = LabelFrame(root, text="Menu",
-font=myFont, padx=pad_x, pady=pad_y, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+
+# Menu Frame
+menuFrame = LabelFrame(root, text="Menu", font=FONT, padx=PAD_X, pady=PAD_Y, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 menuFrame.grid(column=1, row=0, sticky='nsew')
 menuFrame.grid_columnconfigure(0, weight=1)
 menuFrame.grid_columnconfigure(1, weight=2)
 menuFrame.grid_rowconfigure(0, weight=1)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Drink frame
-
-drinkFrame = LabelFrame(menuFrame, text="Drinks", font=myFont, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black", highlightcolor="black")
+# Drink Frame
+drinkFrame = LabelFrame(menuFrame, text="Drinks", font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 drinkFrame.grid(column=0, row=0, sticky='nsew')
 drinkFrame.grid_columnconfigure(0, weight=1)
 drinkFrame.grid_rowconfigure(0, weight=1)
-listboxDrinks = Listbox(drinkFrame, font=myFont, exportselection=False, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+
+listboxDrinks = Listbox(drinkFrame, font=FONT, exportselection=False, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 listboxDrinks.grid(sticky='nsew')
-drinks = db.getMenuItems(False)
+
+drinks = db.get_menu_items(False)
 for drink in drinks:
     listboxDrinks.insert('end', drink[1])
 
-def addDrink(event):
-    drinkItem = db.getMenuItemsByName(listboxDrinks.get(ACTIVE))
-    menuId = drinkItem[0][0]
-    Price = drinkItem[0][2]
-    receiptId = int(entryOrderNum.get())
-    result = db.getReceiptByReceiptIdMenuId(receiptId, menuId)
-    if len(result) == 0:
-        db.insertIntoReceipts(receiptId, menuId, 1, Price)
-    else:
-        db.increaseCount(receiptId, menuId)
+def add_drink(event):
+    try:
+        drink_item = db.get_menu_items_by_name(listboxDrinks.get(ACTIVE))
+        menu_id = drink_item[0][0]
+        price = drink_item[0][2]
+        receipt_id = int(entryOrderNum.get())
+        result = db.get_receipt_by_receipt_id_menu_id(receipt_id, menu_id)
+        if not result:
+            db.insert_into_receipts(receipt_id, menu_id, 1, price)
+        else:
+            db.increase_count(receipt_id, menu_id)
+        load_receipts(receipt_id)
+    except Exception as e:
+        print(f"Error adding drink: {e}")
 
-    loadReceipts(receiptId)
+listboxDrinks.bind('<Double-Button>', add_drink)
 
-listboxDrinks.bind('<Double-Button>', addDrink)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Drink frame
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Food frame
-
-foodFrame = LabelFrame(menuFrame, text="Foods", font=myFont, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+# Food Frame
+foodFrame = LabelFrame(menuFrame, text="Foods", font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 foodFrame.grid(column=1, row=0, sticky='nsew')
 foodFrame.grid_columnconfigure(0, weight=1)
 foodFrame.grid_rowconfigure(0, weight=1)
-listBoxFoods = Listbox(foodFrame, font=myFont, exportselection=False, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
+
+listBoxFoods = Listbox(foodFrame, font=FONT, exportselection=False, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
 listBoxFoods.grid(sticky='nsew')
-foods = db.getMenuItems(True)
 
-def addFood(event):
-    foodItem = db.getMenuItemsByName(listBoxFoods.get(ACTIVE))
-    menuId = foodItem[0][0]
-    Price = foodItem[0][2]
-    receiptId = int(entryOrderNum.get())
-    result = db.getReceiptByReceiptIdMenuId(receiptId, menuId)
-    if len(result) == 0:
-        db.insertIntoReceipts(receiptId, menuId, 1, Price)
-    else:
-        db.increaseCount(receiptId, menuId)
-
-    loadReceipts(receiptId)
-
-listBoxFoods.bind('<Double-Button>', addFood)
-
+foods = db.get_menu_items(True)
 for food in foods:
     listBoxFoods.insert('end', food[1])
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Food frame
+def add_food(event):
+    try:
+        food_item = db.get_menu_items_by_name(listBoxFoods.get(ACTIVE))
+        menu_id = food_item[0][0]
+        price = food_item[0][2]
+        receipt_id = int(entryOrderNum.get())
+        result = db.get_receipt_by_receipt_id_menu_id(receipt_id, menu_id)
+        if not result:
+            db.insert_into_receipts(receipt_id, menu_id, 1, price)
+        else:
+            db.increase_count(receipt_id, menu_id)
+        load_receipts(receipt_id)
+    except Exception as e:
+        print(f"Error adding food: {e}")
+
+listBoxFoods.bind('<Double-Button>', add_food)
+
+def load_receipts(receipt_id):
+    try:
+        listBox.delete(0, 'end')
+        receipts = db.get_receipts_by_receipt_id(receipt_id)
+        for receipt in receipts:
+            listBox.insert(0, f"{receipt[1]} {receipt[2]} {receipt[3]} {receipt[4]}")
+    except Exception as e:
+        print(f"Error loading receipts: {e}")
+
 
 #endregion
 #-------------------------------------------------------------------------------------- Menu Frame
 
 #-------------------------------------------------------------------------------------- Buttons Frame
 #region Buttons
-buttonFrame = LabelFrame(root, font=myFont, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
-buttonFrame.grid(column=1, row=1)
-from subprocess import call
-def openCalculator():
-    call('calc.exe')
 
-def exitProgram():
-    msgBox = messagebox.askquestion('Quit', 'Do you want to quit?'
-, icon = 'warning')
-    if msgBox == 'yes':
-        root.destroy()
+# Button Frame
+buttonFrame = LabelFrame(root, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                            highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+buttonFrame.grid(column=1, row=1, padx=PAD_X, pady=PAD_Y)
 
-exitButton = Button(buttonFrame, text='Exit', font=myFont, bg="#171717", fg="#e0e0e0"
-, command=exitProgram, highlightthickness=3, highlightbackground="black")
-exitButton.grid(column=0, row=0)
+# Function to open calculator
+def open_calculator():
+    try:
+        call('calc.exe')
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to open calculator: {e}")
 
-calcButton = Button(buttonFrame, text='Calculator', font=myFont,
-command=openCalculator, bg="#171717", fg="#e0e0e0"
-, highlightthickness=3, highlightbackground="black")
-calcButton.grid(column=1, row=0)
-root.protocol("WM_DELETE_WINDOW", exitProgram)
+# Function to exit program
+def exit_program():
+    try:
+        msgBox = messagebox.askquestion('Quit', 'Do you want to quit?', icon='warning')
+        if msgBox == 'yes':
+            root.destroy()
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to exit: {e}")
+
+# Exit Button
+exitButton = Button(buttonFrame, text='Exit', font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
+                    command=exit_program, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+exitButton.grid(column=0, row=0, padx=PAD_X, pady=PAD_Y)
+
+# Calculator Button
+calcButton = Button(buttonFrame, text='Calculator', font=FONT, command=open_calculator, bg=BACKGROUND_COLOR,
+                    fg=FOREGROUND_COLOR, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+calcButton.grid(column=1, row=0, padx=PAD_X, pady=PAD_Y)
+
+# Handle window close event
+root.protocol("WM_DELETE_WINDOW", exit_program)
+
 #endregion
 #-------------------------------------------------------------------------------------- Buttons Frame
 
