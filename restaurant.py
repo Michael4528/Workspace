@@ -181,32 +181,32 @@ def loadReceipts(receiptId):
 
 #-------------------------------------------------------------------------------------- Bot
 #region bot
-TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
-DATABASE_FILE: Final = 'restaurant.db'
-async def startCommand(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    await update.message.reply_html(
-        rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /restaurants to see the list.",
-        reply_markup=ForceReply(selective=True),
-    )
+# TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
+# DATABASE_FILE: Final = 'restaurant.db'
+# async def startCommand(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     user = update.effective_user
+#     await update.message.reply_html(
+#         rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /restaurants to see the list.",
+#         reply_markup=ForceReply(selective=True),
+#     )
 
-menuFoods = db.getMenuItems(True)
-menuDrinks = db.getMenuItems(False)
+# menuFoods = db.getMenuItems(True)
+# menuDrinks = db.getMenuItems(False)
 
-async def foodCommand(update:Update, context:ContextTypes.DEFAULT_TYPE):
-    for food in menuFoods:
-        await  update.message.reply_text(food[1])
+# async def foodCommand(update:Update, context:ContextTypes.DEFAULT_TYPE):
+#     for food in menuFoods:
+#         await  update.message.reply_text(food[1])
 
-async def drinkCommand(update:Update, context:ContextTypes.DEFAULT_TYPE):
-    for drink in menuDrinks:
-        await  update.message.reply_text(drink[1])
+# async def drinkCommand(update:Update, context:ContextTypes.DEFAULT_TYPE):
+#     for drink in menuDrinks:
+#         await  update.message.reply_text(drink[1])
 
-if __name__ == '__main__':
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler('start', startCommand))
-    app.add_handler(CommandHandler('foods', foodCommand))
-    app.add_handler(CommandHandler('drinks', drinkCommand))
-    app.run_polling(poll_interval=1)
+# if __name__ == '__main__':
+#     app = Application.builder().token(TOKEN).build()
+#     app.add_handler(CommandHandler('start', startCommand))
+#     app.add_handler(CommandHandler('foods', foodCommand))
+#     app.add_handler(CommandHandler('drinks', drinkCommand))
+#     app.run_polling(poll_interval=1)
 #endregion
 #-------------------------------------------------------------------------------------- Bot
 
