@@ -209,32 +209,39 @@ def load_receipts(receipt_id):
 
 #-------------------------------------------------------------------------------------- Bot
 #region bot
-# TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
-# DATABASE_FILE: Final = 'restaurant.db'
-# async def startCommand(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     user = update.effective_user
-#     await update.message.reply_html(
-#         rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /restaurants to see the list.",
-#         reply_markup=ForceReply(selective=True),
-#     )
 
-# menuFoods = db.getMenuItems(True)
-# menuDrinks = db.getMenuItems(False)
+# Constants
+TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
+DATABASE_FILE: Final = 'restaurant.db'
 
-# async def foodCommand(update:Update, context:ContextTypes.DEFAULT_TYPE):
-#     for food in menuFoods:
-#         await  update.message.reply_text(food[1])
+# Function to start the bot
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    await update.message.reply_html(
+        rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /foods to see the food menu and /drinks to see the drink menu.",
+        reply_markup=ForceReply(selective=True),
+    )
 
-# async def drinkCommand(update:Update, context:ContextTypes.DEFAULT_TYPE):
-#     for drink in menuDrinks:
-#         await  update.message.reply_text(drink[1])
+# Fetch menu items
+menu_foods = db.getMenuItems(True)
+menu_drinks = db.getMenuItems(False)
 
-# if __name__ == '__main__':
-#     app = Application.builder().token(TOKEN).build()
-#     app.add_handler(CommandHandler('start', startCommand))
-#     app.add_handler(CommandHandler('foods', foodCommand))
-#     app.add_handler(CommandHandler('drinks', drinkCommand))
-#     app.run_polling(poll_interval=1)
+# Function to display food menu
+async def food_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for food in menu_foods:
+        await update.message.reply_text(food[1])
+
+# Function to display drink menu
+async def drink_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for drink in menu_drinks:
+        await update.message.reply_text(drink[1])
+
+if __name__ == '__main__':
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler('start', start_command))
+    app.add_handler(CommandHandler('foods', food_command))
+    app.add_handler(CommandHandler('drinks', drink_command))
+    app.run_polling(poll_interval=1)
 #endregion
 #-------------------------------------------------------------------------------------- Bot
 
