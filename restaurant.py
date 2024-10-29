@@ -207,38 +207,38 @@ def load_receipts(receipt_id):
 
 #region bot
 
-# # Constants
-# TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
-# DATABASE_FILE: Final = 'restaurant.db'
+# Constants
+TOKEN: Final = '7599295073:AAF7QCxtVupmbkf89QbdjwbHvC48_w0ecB8'
+DATABASE_FILE: Final = 'restaurant.db'
 
-# # Function to start the bot
-# async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     user = update.effective_user
-#     await update.message.reply_html(
-#         rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /foods to see the food menu and /drinks to see the drink menu.",
-#         reply_markup=ForceReply(selective=True),
-#     )
+# Function to start the bot
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    await update.message.reply_html(
+        rf"Hi {user.mention_html()}! I'm your Restaurant Bot. Use /foods to see the food menu and /drinks to see the drink menu.",
+        reply_markup=ForceReply(selective=True),
+    )
 
-# # Fetch menu items
-# menu_foods = db.get_menu_items(True)
-# menu_drinks = db.get_menu_items(False)
+# Fetch menu items
+menu_foods = db.get_menu_items(True)
+menu_drinks = db.get_menu_items(False)
 
-# # Function to display food menu
-# async def food_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     for food in menu_foods:
-#         await update.message.reply_text(food[1])
+# Function to display food menu
+async def food_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for food in menu_foods:
+        await update.message.reply_text(food[1])
 
-# # Function to display drink menu
-# async def drink_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     for drink in menu_drinks:
-#         await update.message.reply_text(drink[1])
+# Function to display drink menu
+async def drink_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for drink in menu_drinks:
+        await update.message.reply_text(drink[1])
 
-# if __name__ == '__main__':
-#     app = Application.builder().token(TOKEN).build()
-#     app.add_handler(CommandHandler('start', start_command))
-#     app.add_handler(CommandHandler('foods', food_command))
-#     app.add_handler(CommandHandler('drinks', drink_command))
-#     app.run_polling(poll_interval=1)
+if __name__ == '__main__':
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler('start', start_command))
+    app.add_handler(CommandHandler('foods', food_command))
+    app.add_handler(CommandHandler('drinks', drink_command))
+    app.run_polling(poll_interval=1)
 #endregion
 
 #region Receipt
