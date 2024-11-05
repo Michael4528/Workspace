@@ -257,7 +257,7 @@ receiptFrame.grid_columnconfigure(0, weight=1)
 receiptFrame.grid_rowconfigure(1, weight=1)
 
 entryOrderNum = Entry(receiptFrame, font=FONT, width=10, justify='center', bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=1, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 entryOrderNum.grid(column=0, row=0)
 
 def entry_key_release(event):
@@ -275,10 +275,10 @@ maxReceiptNumber = maxReceiptNumber if maxReceiptNumber is not None else 0
 maxReceiptNumber += 1
 entryOrderNum.insert(0, maxReceiptNumber)
 
-listBox = Listbox(receiptFrame, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+listBox = Listbox(receiptFrame, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR, highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 listBox.grid(column=0, row=1, sticky='nsew')
 
-listBoxButtonsFrame = LabelFrame(receiptFrame, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+listBoxButtonsFrame = LabelFrame(receiptFrame, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR, highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 listBoxButtonsFrame.grid(column=0, row=2, sticky='nsew')
 listBoxButtonsFrame.grid_columnconfigure(0, weight=1)
 listBoxButtonsFrame.grid_columnconfigure(1, weight=1)
@@ -307,7 +307,7 @@ def delete_receipt_item():
         print(f"Error deleting receipt item: {e}")
 
 deleteButton = Button(listBoxButtonsFrame, text='Delete row', font=FONT, command=delete_receipt_item, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 deleteButton.grid(column=0, row=0, sticky='nsew')
 
 def new_receipt():
@@ -319,7 +319,7 @@ def new_receipt():
     entryOrderNum.insert(0, max_receipt_number)
 
 newButton = Button(listBoxButtonsFrame, text='Add factor', font=FONT, command=new_receipt, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                    highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                    highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 newButton.grid(column=1, row=0, sticky='nsew')
 
 def increase_item():
@@ -334,7 +334,7 @@ def increase_item():
         print(f"Error increasing item count: {e}")
 
 addButton = Button(listBoxButtonsFrame, text='+', font=FONT, command=increase_item, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                    highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                    highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 addButton.grid(column=2, row=0, sticky='nsew')
 
 def decrease_item():
@@ -349,7 +349,7 @@ def decrease_item():
         print(f"Error decreasing item count: {e}")
 
 minusButton = Button(listBoxButtonsFrame, text='-', font=FONT, command=decrease_item, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 minusButton.grid(column=3, row=0, sticky='nsew')
 
 #endregion
@@ -358,7 +358,7 @@ minusButton.grid(column=3, row=0, sticky='nsew')
 
 # Menu Frame
 menuFrame = LabelFrame(root, text="Menu", font=FONT, padx=PAD_X, pady=PAD_Y, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 menuFrame.grid(column=1, row=0, sticky='nsew')
 menuFrame.grid_columnconfigure(0, weight=1)
 menuFrame.grid_columnconfigure(1, weight=2)
@@ -366,13 +366,13 @@ menuFrame.grid_rowconfigure(0, weight=1)
 
 # Drink Frame
 drinkFrame = LabelFrame(menuFrame, text="Drinks", font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 drinkFrame.grid(column=0, row=0, sticky='nsew')
 drinkFrame.grid_columnconfigure(0, weight=1)
 drinkFrame.grid_rowconfigure(0, weight=1)
 
 listboxDrinks = Listbox(drinkFrame, font=FONT, exportselection=False, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 listboxDrinks.grid(sticky='nsew')
 
 drinks = db.get_menu_items(False)
@@ -398,13 +398,13 @@ listboxDrinks.bind('<Double-Button>', add_drink)
 
 # Food Frame
 foodFrame = LabelFrame(menuFrame, text="Foods", font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 foodFrame.grid(column=1, row=0, sticky='nsew')
 foodFrame.grid_columnconfigure(0, weight=1)
 foodFrame.grid_rowconfigure(0, weight=1)
 
 listBoxFoods = Listbox(foodFrame, font=FONT, exportselection=False, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                        highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                        highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 listBoxFoods.grid(sticky='nsew')
 
 foods = db.get_menu_items(True)
@@ -444,7 +444,7 @@ def load_receipts(receipt_id):
 
 # Button Frame
 buttonFrame = LabelFrame(root, font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                            highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                            highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 buttonFrame.grid(column=1, row=1, padx=PAD_X, pady=PAD_Y)
 
 # Function to open calculator
@@ -465,12 +465,12 @@ def exit_program():
 
 # Exit Button
 exitButton = Button(buttonFrame, text='Exit', font=FONT, bg=BACKGROUND_COLOR, fg=FOREGROUND_COLOR,
-                    command=exit_program, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                    command=exit_program, highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 exitButton.grid(column=0, row=0, padx=PAD_X, pady=PAD_Y)
 
 # Calculator Button
 calcButton = Button(buttonFrame, text='Calculator', font=FONT, command=open_calculator, bg=BACKGROUND_COLOR,
-                    fg=FOREGROUND_COLOR, highlightthickness=3, highlightbackground=HIGHLIGHT_COLOR)
+                    fg=FOREGROUND_COLOR, highlightthickness=0, highlightbackground=HIGHLIGHT_COLOR)
 calcButton.grid(column=1, row=0, padx=PAD_X, pady=PAD_Y)
 
 # Handle window close event
