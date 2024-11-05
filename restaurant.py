@@ -14,7 +14,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Constants 
 
-BACKGROUND_COLOR = "#171717" 
+BACKGROUND_COLOR = "#ffffff" 
 FONT_FAMILY = 'Calibri' 
 FONT_SIZE = 16 
 
@@ -244,9 +244,9 @@ def load_receipts(receipt_id):
 #region Receipt
 
 # Constants
-BACKGROUND_COLOR = "#171717"
-FOREGROUND_COLOR = "#e0e0e0"
-HIGHLIGHT_COLOR = "black"
+BACKGROUND_COLOR = "#ffffff"
+FOREGROUND_COLOR = "#171717"
+HIGHLIGHT_COLOR = "white"
 PAD_X, PAD_Y = 5, 5
 FONT = ('Calibri', 16)
 
