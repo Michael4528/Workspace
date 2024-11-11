@@ -79,6 +79,7 @@ class Database:
                                 COUNT INTEGER,
                                 PRICE INTEGER)''')
 
+
         # Create View for Menu Receipts
         self.cursor.execute('''CREATE VIEW IF NOT EXISTS viewMenuReceipts AS
                                 SELECT TABLE_RECEIPTS.RECEIPT_ID,
